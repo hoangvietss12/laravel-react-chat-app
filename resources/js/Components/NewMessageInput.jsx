@@ -11,12 +11,12 @@ export default function NewMessageInput({value, onChange, onSend}) {
         }
     };
 
-    const onChangeEvent = (e) => {
-        setTimeout(() => {
-            adjustHeight();
-        }, 10);
-        onChange(e);
-    };
+    // const onChangeEvent = (e) => {
+    //     setTimeout(() => {
+    //         adjustHeight();
+    //     }, 10);
+    //     onChange(e);
+    // };
 
     const adjustHeight = () => {
         setTimeout(() => {

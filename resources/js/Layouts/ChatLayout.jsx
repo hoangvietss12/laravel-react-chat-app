@@ -32,29 +32,29 @@ export default function ChatLayout({ children }) {
     };
 
     // display new message
-    // const messageCreated = (message) => {
-    //     setLocalConversations((oldUsers) => {
-    //         return oldUsers.map((user) => {
-    //             if(message.receiver_id &&
-    //                 !user.is_group &&
-    //                 (user.id === message.sender_id || user.id === message.receiver_id)
-    //             ) {
-    //                 user.last_message = message.message;
-    //                 user.last_message_date = message.created_at;
-    //                 return user;
-    //             }
+    const messageCreated = (message) => {
+        setLocalConversations((oldUsers) => {
+            return oldUsers.map((user) => {
+                if(message.receiver_id &&
+                    !user.is_group &&
+                    (user.id === message.sender_id || user.id === message.receiver_id)
+                ) {
+                    user.last_message = message.message;
+                    user.last_message_date = message.created_at;
+                    return user;
+                }
 
-    //             if(message.group_id &&
-    //                 user.is_group &&
-    //                 user.id === message.group_id
-    //             ) {
-    //                 user.last_message = message.message;
-    //                 user.last_message_date = message.created_at;
-    //                 return user;
-    //             }
-    //         })
-    //     })
-    // }
+                if(message.group_id &&
+                    user.is_group &&
+                    user.id === message.group_id
+                ) {
+                    user.last_message = message.message;
+                    user.last_message_date = message.created_at;
+                    return user;
+                }
+            })
+        })
+    }
 
     // useEffect(() => {
     //     const offCreated = on("message.created", messageCreated);
