@@ -2,17 +2,17 @@ import ChatLayout from '@/Layouts/ChatLayout';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/solid';
-// import ConversationHeader from '@/Components/ConversationHeader';
-// import MessageItem from '@/Components/MessageItem';
-// import MessageInput from '@/Components/MessageInput';
+import ConversationHeader from '@/Components/ConversationHeader';
+import MessageItem from '@/Components/MessageItem';
+import MessageInput from '@/Components/MessageInput';
 // import { useEventBus } from '@/Components/EventBus';
 
-export default function Home({ auth }) {
-    // const [localMessages, setLocalMessages] = useState([]);
+export default function Home({ messages = null, selectedConversation = null }) {
+    const [localMessages, setLocalMessages] = useState([]);
     // const [noMoreMessage, setNoMoreMessage] = useState(false);
     // const [scrollFromBottom, setScrollFromBottom] = useState(0);
     // const loadMoreIntersect = useRef(null);
-    // const messagesCtrRef = useRef(null);
+    const messagesCtrRef = useRef(null);
     // const {on} = useEventBus();
 
     // const loadMoreMessages = useCallback(() => {
@@ -71,10 +71,10 @@ export default function Home({ auth }) {
     //     }
     // }, [selectedConversation]);
 
-    // // set localMessages when messages change
-    // useEffect(() => {
-    //     setLocalMessages(messages ? messages.data.reverse() : []);
-    // }, [messages]);
+    // set localMessages when messages change
+    useEffect(() => {
+        setLocalMessages(messages ? messages.data.reverse() : []);
+    }, [messages]);
 
     // // handle load more message
     // useEffect(() => {
@@ -107,8 +107,8 @@ export default function Home({ auth }) {
 
     return (
         <>
-            {/* {!messages && (
-                <div className='flex flex-col gap-8 justify-center items-center text-center h-full opacity-35'>
+            {!messages && (
+                <div className='flex flex-col gap-8 items-center text-center h-full opacity-35'>
                     <div className='text-2xl md:text-4xl p-16 text-black-200'>
                         Nhấn vào cuộc hội thoại để chat
                     </div>
@@ -132,10 +132,11 @@ export default function Home({ auth }) {
                                 </div>
                             </div>
                         )}
-                        {/* render messages  */}
-                        {/* {localMessages.length > 0 && (
+
+                        {/* render messages */}
+                        {localMessages.length > 0 && (
                             <div className='flex-1 flex flex-col'>
-                                <div ref={loadMoreIntersect}></div>
+                                {/* <div ref={loadMoreIntersect}></div> */}
                                 {localMessages.map((message) => {
                                     return (
                                         <MessageItem
@@ -147,10 +148,9 @@ export default function Home({ auth }) {
                             </div>
                         )}
                     </div>
-                    <MessageInput conversation={selectedConversation} />
+                    {/* <MessageInput conversation={selectedConversation} /> */}
                 </>
-            )} */}
-            Message
+            )}
         </>
     );
 }

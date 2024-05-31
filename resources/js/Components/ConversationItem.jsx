@@ -2,7 +2,7 @@ import { Link, usePage } from "@inertiajs/react";
 import UserAvatar from "./UserAvatar";
 import GroupAvatar from "./GroupAvatar";
 import UserOptionDropDown from "./UserOptionDropdown";
-// import { formatMessageDateShort } from "@/helpers";
+import { formatMessageDateShort } from "@/helpers";
 
 export default function ConversationItem({conversation, selectedConversation = null, online = null}) {
     const page = usePage();
@@ -29,11 +29,11 @@ export default function ConversationItem({conversation, selectedConversation = n
 
     return (
         <Link
-            // href={
-            //     conversation.is_group
-            //     ? route('chat.group', conversation)
-            //     : route('chat.user', conversation)
-            // }
+            href={
+                conversation.is_group
+                ? route('chat.group', conversation)
+                : route('chat.user', conversation)
+            }
             preserveState
             className={
                 "conversation-item flex items-center gap-2 p-2 text-gray-300 transition-all cursor-pointer border-l-4 hover:bg-black/30"
@@ -67,7 +67,7 @@ export default function ConversationItem({conversation, selectedConversation = n
                     </h3>
                     {conversation.last_message_date && (
                         <span className="text-nowrap">
-                            {/* {formatMessageDateShort(conversation.last_message_date)} */}
+                            {formatMessageDateShort(conversation.last_message_date)}
                         </span>
                     )}
                 </div>
