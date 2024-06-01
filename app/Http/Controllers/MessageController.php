@@ -50,7 +50,7 @@ class MessageController extends Controller
                                         ->orWhere('sender_id', $message->receiver_id)
                                         ->where('receiver_id', $message->sender_id);
                                 })
-                                ->latest()->paginate(20);
+                                ->latest()->paginate(10);
         }
 
         return MessageResource::collection($messages);

@@ -22,7 +22,7 @@ export default function Home({ messages = null, selectedConversation = null }) {
         }
 
         const firstMessage = localMessages[0];
-        axios.get(route('message.load-older', firstMessage))
+        axios.get(route('message.loadOlder', firstMessage.id))
             .then(({data}) => {
                 if(data.data.length === 0) {
                     setNoMoreMessage(true);
