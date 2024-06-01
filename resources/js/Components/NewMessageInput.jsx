@@ -11,12 +11,12 @@ export default function NewMessageInput({value, onChange, onSend}) {
         }
     };
 
-    // const onChangeEvent = (e) => {
-    //     setTimeout(() => {
-    //         adjustHeight();
-    //     }, 10);
-    //     onChange(e);
-    // };
+    const onChangeEvent = (e) => {
+        setTimeout(() => {
+            adjustHeight();
+        }, 10);
+        onChange(e);
+    };
 
     const adjustHeight = () => {
         setTimeout(() => {
@@ -36,6 +36,7 @@ export default function NewMessageInput({value, onChange, onSend}) {
             rows="1"
             placeholder="Nhập vào gì đó..."
             onKeyDown={onInputKeyDown}
+            onChange={(e) => onChangeEvent(e)}
             className="input input-bordered w-full rounded-r-none resize-none overflow-y-auto max-h-40"
         >
 

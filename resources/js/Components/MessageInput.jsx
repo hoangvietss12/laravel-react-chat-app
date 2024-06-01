@@ -39,9 +39,10 @@ export default function MessageInput({conversation = null}) {
         // check message is null or not
         if(newMessage.trim === "") {
             setInputErrorMessage("Hãy nhập vào gì đó đã!");
+            console.log(inputErrorMessage)
             setTimeout(() => {
                 setInputErrorMessage("");
-            }, 300);
+            }, 3000);
             return;
         }
 
@@ -69,6 +70,7 @@ export default function MessageInput({conversation = null}) {
             setMessageSending(false);
         });
     }
+    console.log(newMessage)
 
     return (
         <div className="flex flex-wrap items-start border-t border-slate-700 py-3">
