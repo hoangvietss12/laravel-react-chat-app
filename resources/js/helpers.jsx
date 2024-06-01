@@ -1,68 +1,36 @@
-export const formatMessageDateLong = (date) => {
-    const now = new Date();
-    const inputDate = new Date(date);
+import { format,toZonedTime } from 'date-fns-tz';
+import { isToday, isYesterday } from 'date-fns';
 
-    if(isToday(inputDate)) {
-        return inputDate.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit"
-        });
-    }else if(isYesterday(inputDate)) {
-        return (
-            "Hôm qua " +
-            inputDate.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit"
-            })
-        );
-    }else if(inputDate.getFullYear() === now.getFullYear()) {
-        return inputDate.toLocaleDateString([], {
-            day: "2-digit",
-            month: "short"
-        });
-    }else {
-        return inputDate.toLocaleDateString();
+export const formatMessageDateLong = (date) => {
+    // UTC+7 time zone
+    const timeZone = 'Asia/Bangkok';
+    const now = toZonedTime(new Date(), timeZone);
+    const inputDate = toZonedTime(new Date(date), timeZone);
+
+    if (isToday(inputDate)) {
+        return format(inputDate, 'HH:mm', { timeZone });
+    } else if (isYesterday(inputDate)) {
+        return `Hôm qua ${format(inputDate, 'HH:mm', { timeZone })}`;
+    } else if (inputDate.getFullYear() === now.getFullYear()) {
+        return format(inputDate, 'dd/MM', { timeZone });
+    } else {
+        return format(inputDate, 'dd/MM/yyyy', { timeZone });
     }
-}
+};
 
 export const formatMessageDateShort = (date) => {
-    const now = new Date();
-    const inputDate = new Date(date);
+    // UTC+7 time zone
+    const timeZone = 'Asia/Bangkok';
+    const now = toZonedTime(new Date(), timeZone);
+    const inputDate = toZonedTime(new Date(date), timeZone);
 
-    if(isToday(inputDate)) {
-        return inputDate.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit"
-        });
-    }else if(isYesterday(inputDate)) {
-        return "Hôm qua ";
-    }else if(inputDate.getFullYear() === now.getFullYear()) {
-        return inputDate.toLocaleDateString([], {
-            day: "2-digit",
-            month: "short"
-        });
-    }else {
-        return inputDate.toLocaleDateString();
+    if (isToday(inputDate)) {
+        return format(inputDate, 'HH:mm', { timeZone });
+    } else if (isYesterday(inputDate)) {
+        return 'Hôm qua';
+    } else if (inputDate.getFullYear() === now.getFullYear()) {
+        return format(inputDate, 'dd/MM', { timeZone });
+    } else {
+        return format(inputDate, 'dd/MM/yyyy', { timeZone });
     }
-}
-
-export const isToday = (date) => {
-    const today = new Date();
-
-    return (
-        date.getDate() === today.getDate() &&
-        date.getMonth() === today.getMonth() &&
-        date.getFullYear() === today.getFullYear()
-    );
-}
-
-export const isYesterday = (date) => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    return (
-        date.getDate() === yesterday.getDate() &&
-        date.getMonth() === yesterday.getMonth() &&
-        date.getFullYear() === yesterday.getFullYear()
-    );
 }
