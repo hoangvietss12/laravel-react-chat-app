@@ -1,20 +1,21 @@
 import ConversationItem from "@/Components/ConversationItem";
-// import { useEventBus } from "@/Components/EventBus";
 import TextInput from "@/Components/TextInput";
 import { PencilSquareIcon } from "@heroicons/react/24/solid";
 import { usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
+import Echo from "laravel-echo";
 
 
 export default function ChatLayout({ children }) {
     const page = usePage();
     // get from inertiajs request
     const conversations = page.props.conversations;
+    const user = page.props.auth.user;
     const selectedConversation = page.props.selectedConversation;
     const [localConversations, setLocalConversations] = useState([]);
     const [sortedConversations, setSortedConversations] = useState([]);
     const [onlineUsers, setOnlineUsers] = useState({});
-    // const {on} = useEventBus();
+
 
     // check user online yet (return true/false)
     const isUserOnline = (userId) => onlineUsers[userId];
@@ -32,37 +33,94 @@ export default function ChatLayout({ children }) {
     };
 
     // display new message
-    // const messageCreated = (message) => {
-    //     setLocalConversations((oldUsers) => {
-    //         return oldUsers.map((user) => {
-    //             if(message.receiver_id &&
-    //                 !user.is_group &&
-    //                 (user.id === message.sender_id || user.id === message.receiver_id)
-    //             ) {
-    //                 user.last_message = message.message;
-    //                 user.last_message_date = message.created_at;
-    //                 return user;
-    //             }
+    const messageCreated = (message) => {
+        setLocalConversations((oldUsers) => {
+            return oldUsers.map((u) => {
+                if(message.receiver_id &&
+                    !u.is_group &&
+                    (u.id == message.sender_id || u.id == message.receiver_id)
+                ) {
+                    u.last_message = message.message;
+                    u.last_message_date = message.created_at;
+                    return u;
+                }
 
-    //             if(message.group_id &&
-    //                 user.is_group &&
-    //                 user.id === message.group_id
-    //             ) {
-    //                 user.last_message = message.message;
-    //                 user.last_message_date = message.created_at;
-    //                 return user;
-    //             }
-    //         })
-    //     })
-    // }
+                if(message.group_id &&
+                    u.is_group &&
+                    u.id == message.group_id
+                ) {
+                    u.last_message = message.message;
+                    u.last_message_date = message.created_at;
+                    return u;
+                }
 
-    // useEffect(() => {
-    //     const offCreated = on("message.created", messageCreated);
+                return u;
+            });
+        });
 
-    //     return () => {
-    //         offCreated();
-    //     };
-    // }, [on]);
+        setSortedConversations(
+            localConversations.sort((a, b) => {
+                if(a.blocked_at && b.blocked_at) {
+                    return a.blocked_at > b.blocked_at ? 1 : -1;
+                }else if(a.blocked_at) {
+                    return 1;
+                }else if(b.blocked_at) {
+                    return -1;
+                }
+
+                if(a.last_message_date && b.last_message_date) {
+                    return b.last_message_date.localeCompare(
+                        a.last_message_date
+                    );
+                }else if(a.last_message_date) {
+                    return -1;
+                }else if(b.last_message_date) {
+                    return 1;
+                }else {
+                    return 0;
+                }
+            })
+        )
+    };
+
+    // set local conversations whenever conversations change
+    useEffect(() => {
+        setLocalConversations(conversations);
+    }, [conversations]);
+
+    // handle new message event
+    useEffect(() => {
+        conversations.forEach((conversation) => {
+            let channel = `message.group.${conversation.id}`;
+
+            if(conversation.is_user) {
+                channel = `message.user.${[
+                    parseInt(user.id),
+                    parseInt(conversation.id)
+                ].sort((a, b) => a - b).join('-')}`;
+            }
+
+            window.Echo.private(channel)
+                .listen('SocketMessage', (e) => {
+                    messageCreated(e.message);
+                });
+        });
+
+
+        return () => {
+            conversations.forEach((conversation) => {
+                let channel = `message.group.${conversation.id}`;
+
+                if(conversation.is_user) {
+                    channel = `message.user.${[
+                        parseInt(user.id),
+                        parseInt(conversation.id)
+                    ].sort((a, b) => a - b).join('-')}`;
+                }
+                window.Echo.leave(channel);
+            });
+        }
+    }, [conversations]);
 
     // sort conversation based on block_at and last_message_date
     useEffect(() => {
@@ -91,14 +149,9 @@ export default function ChatLayout({ children }) {
         )
     }, [localConversations]);
 
-    // set local conversations whenever conversations change
-    useEffect(() => {
-        setLocalConversations(conversations);
-    }, [conversations]);
-
     // listen event to update onlineUser
     useEffect(() => {
-        Echo.join("online")
+        window.Echo.join("online")
             .here((users) => {
                 const onlineUsersObj = Object.fromEntries(users.map((user) => [user.id, user]));
 
@@ -127,10 +180,10 @@ export default function ChatLayout({ children }) {
             });
 
             return () => {
-                Echo.leave("online");
+                window.Echo.leave("online");
             }
     }, []);
-    // console.log(sortedConversations)
+
     return (
         <>
             <div className="flex-1 w-full flex overflow-hidden">

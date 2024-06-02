@@ -70,7 +70,7 @@ export default function MessageInput({conversation = null}) {
             setMessageSending(false);
         });
     }
-    console.log(newMessage)
+    // console.log(newMessage)
 
     return (
         <div className="flex flex-wrap items-start border-t border-slate-700 py-3">

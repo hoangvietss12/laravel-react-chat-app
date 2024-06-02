@@ -5,16 +5,19 @@ import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/solid';
 import ConversationHeader from '@/Components/ConversationHeader';
 import MessageItem from '@/Components/MessageItem';
 import MessageInput from '@/Components/MessageInput';
-// import { useEventBus } from '@/Components/EventBus';
 import axios from 'axios';
+import { usePage } from '@inertiajs/react';
 
 export default function Home({ messages = null, selectedConversation = null }) {
+    const page = usePage();
+    // get from inertiajs request
+    const conversations = page.props.conversations;
+    const user = page.props.auth.user;
     const [localMessages, setLocalMessages] = useState([]);
     const [noMoreMessage, setNoMoreMessage] = useState(false);
     const [scrollFromBottom, setScrollFromBottom] = useState(0);
     const loadMoreIntersect = useRef(null);
     const messagesCtrRef = useRef(null);
-    // const {on} = useEventBus();
 
     const loadMoreMessages = useCallback(() => {
         if(noMoreMessage) {
@@ -40,21 +43,22 @@ export default function Home({ messages = null, selectedConversation = null }) {
             })
     }, [localMessages, noMoreMessage]);
 
-    // const messageCreated = (message) => {
-    //     if(selectedConversation &&
-    //         selectedConversation.is_group &&
-    //         selectedConversation.id === message.group_id
-    //     ) {
-    //         setLocalMessages((prevMessages) => [...prevMessages, message]);
-    //     }
+    // add new message
+    const messageCreated = (message) => {
+        if(selectedConversation &&
+            selectedConversation.is_group &&
+            selectedConversation.id == message.group_id
+        ) {
+            setLocalMessages((prevMessages) => [...prevMessages, message]);
+        }
 
-    //     if(selectedConversation &&
-    //         selectedConversation.is_user &&
-    //         selectedConversation.id === message.sender_id || selectedConversation.id === message.receiver_id
-    //     ) {
-    //         setLocalMessages((prevMessages) => [...prevMessages, message]);
-    //     }
-    // }
+        if(selectedConversation &&
+            selectedConversation.is_user &&
+            selectedConversation.id == message.sender_id || selectedConversation.id == message.receiver_id
+        ) {
+            setLocalMessages((prevMessages) => [...prevMessages, message]);
+        }
+    }
     // auto scroll when selectedConversation change
     useEffect(() => {
         setTimeout(() => {
@@ -63,13 +67,38 @@ export default function Home({ messages = null, selectedConversation = null }) {
             }
         }, 10);
 
-        // const offCreated = on('message.created', messageCreated);
-        // setScrollFromBottom(0);
-        // setNoMoreMessage(false);
+        conversations.forEach((conversation) => {
+            let channel =  `message.group.${conversation.id}`;
 
-        // return () => {
-        //     offCreated();
-        // }
+            if(conversation.is_user) {
+                channel = `message.user.${[
+                    parseInt(user.id),
+                    parseInt(conversation.id)
+                ].sort((a, b) => a - b).join('-')}`;
+
+            }
+
+            window.Echo.private(channel)
+                .listen("SocketMessage", (e) => {
+                    messageCreated(e.message);
+                    setNoMoreMessage(false);
+                    setScrollFromBottom(0);
+                });
+        });
+
+        return () => {
+            conversations.forEach((conversation) => {
+                let channel = `message.group.${conversation.id}`;
+
+                if(conversation.is_user) {
+                    channel = `message.user.${[
+                        parseInt(user.id),
+                        parseInt(conversation.id)
+                    ].sort((a, b) => a - b).join('-')}`;
+                }
+                window.Echo.leave(channel);
+            });
+        }
     }, [selectedConversation]);
 
     // set localMessages when messages change
