@@ -3,8 +3,9 @@ import UserAvatar from "./UserAvatar";
 import ReactMarkdown from "react-markdown";
 import React from "react";
 import {formatMessageDateLong} from "@/helpers";
+import MessageAttachment from "./MessageAttachment";
 
-export default function MessageItem({message}) {
+export default function MessageItem({message, attachmentClick}) {
     const currentUser = usePage().props.auth.user
 
     return (
@@ -39,6 +40,10 @@ export default function MessageItem({message}) {
                     <div className="chat-message-content">
                         <ReactMarkdown>{message.message}</ReactMarkdown>
                     </div>
+                    <MessageAttachment
+                        attachments={message.attachments}
+                        attachmentClick={attachmentClick}
+                    />
                 </div>
             </div>
         </div>

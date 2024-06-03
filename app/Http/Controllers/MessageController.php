@@ -74,7 +74,7 @@ class MessageController extends Controller
 
                 $model = [
                     'message_id' => $message->id,
-                    'name' => $file->getClientOriginName(),
+                    'name' => $file->getClientOriginalName(),
                     'mine' => $file->getClientMimeType(),
                     'size' => $file->getSize(),
                     'path' => $file->store($directory, 'public')

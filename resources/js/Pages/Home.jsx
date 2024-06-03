@@ -7,6 +7,7 @@ import MessageItem from '@/Components/MessageItem';
 import MessageInput from '@/Components/MessageInput';
 import axios from 'axios';
 import { usePage } from '@inertiajs/react';
+import AttachmentPreviewModal from '@/Components/AttachmentPreviewModal';
 
 export default function Home({ messages = null, selectedConversation = null }) {
     const page = usePage();
@@ -16,9 +17,22 @@ export default function Home({ messages = null, selectedConversation = null }) {
     const [localMessages, setLocalMessages] = useState([]);
     const [noMoreMessage, setNoMoreMessage] = useState(false);
     const [scrollFromBottom, setScrollFromBottom] = useState(0);
+    const [showAttachmentPreview, setShowAttachmentPreview] = useState(false);
+    const [previewAttachment, setPreviewAttachment] = useState({});
     const loadMoreIntersect = useRef(null);
     const messagesCtrRef = useRef(null);
 
+    // preview attachments
+    const onAttachmentClick = (attachments, ind) => {
+        setPreviewAttachment({
+            attachments,
+            ind,
+        });
+        setShowAttachmentPreview(true);
+    };
+
+    console.log(previewAttachment.ind)
+    // load more message
     const loadMoreMessages = useCallback(() => {
         if(noMoreMessage) {
             return;
@@ -172,6 +186,7 @@ export default function Home({ messages = null, selectedConversation = null }) {
                                         <MessageItem
                                             key={message.id}
                                             message={message}
+                                            attachmentClick={onAttachmentClick}
                                         />
                                     )
                                 })}
@@ -180,6 +195,15 @@ export default function Home({ messages = null, selectedConversation = null }) {
                     </div>
                     <MessageInput conversation={selectedConversation} />
                 </>
+            )}
+
+            {previewAttachment.attachments && (
+                <AttachmentPreviewModal
+                    attachments={previewAttachment.attachments}
+                    index={previewAttachment.ind}
+                    show={showAttachmentPreview}
+                    onClose={() => setShowAttachmentPreview(false)}
+                />
             )}
         </>
     );
