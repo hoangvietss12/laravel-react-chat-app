@@ -31,7 +31,6 @@ export default function Home({ messages = null, selectedConversation = null }) {
         setShowAttachmentPreview(true);
     };
 
-    console.log(previewAttachment.ind)
     // load more message
     const loadMoreMessages = useCallback(() => {
         if(noMoreMessage) {
@@ -59,6 +58,7 @@ export default function Home({ messages = null, selectedConversation = null }) {
 
     // add new message
     const messageCreated = (message) => {
+        console.log(message)
         if(selectedConversation &&
             selectedConversation.is_group &&
             selectedConversation.id == message.group_id
