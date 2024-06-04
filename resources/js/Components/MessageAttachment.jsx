@@ -54,6 +54,7 @@ export default function MessageAttachment({attachments, attachmentClick}) {
                                     <div className="relative flex justify-center items-center">
                                         <audio
                                             src={attachment.url}
+                                            controls
                                         >
 
                                         </audio>
