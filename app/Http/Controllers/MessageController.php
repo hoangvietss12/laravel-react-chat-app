@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\MessageDeleted;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -105,8 +106,28 @@ class MessageController extends Controller
             return response()->json(['Message' => 'Không tìm thấy'], 403);
         }
 
+        $group = null;
+        $conversation = null;
+        $last_message = null;
+
+        if($message->group_id) {
+            $group = Group::where('last_message_id', $message->id)->first();
+        }else {
+            $conversation = Conversation::where('last_message_id', $message->id)->first();
+        }
+
         $message->delete();
 
-        return response('', 204);
+        if($group) {
+            $group = Group::find($group->id);
+            $last_message = $group->lastMessage;
+        }else if($conversation) {
+            $conversation = Conversation::find($conversation->id);
+            $last_message = $conversation->lastMessage;
+        }
+
+        MessageDeleted::dispatch($message, $last_message);
+
+        return response()->json(['message' => $last_message ? new MessageResource($last_message) : null]);
     }
 }

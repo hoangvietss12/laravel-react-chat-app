@@ -32,7 +32,7 @@ export default function ChatLayout({ children }) {
         )
     };
 
-    // display new message
+    // message events
     const messageCreated = (message) => {
         setLocalConversations((oldUsers) => {
             return oldUsers.map((u) => {
@@ -80,15 +80,23 @@ export default function ChatLayout({ children }) {
                     return 0;
                 }
             })
-        )
+        );
     };
+
+    const messageDeleted = (lastMessage) => {
+        if(!lastMessage) {
+            return;
+        }
+
+        messageCreated(lastMessage);
+    }
 
     // set local conversations whenever conversations change
     useEffect(() => {
         setLocalConversations(conversations);
     }, [conversations]);
 
-    // handle new message event
+    // handle message events
     useEffect(() => {
         conversations.forEach((conversation) => {
             let channel = `message.group.${conversation.id}`;
@@ -103,6 +111,9 @@ export default function ChatLayout({ children }) {
             window.Echo.private(channel)
                 .listen('SocketMessage', (e) => {
                     messageCreated(e.message);
+                })
+                .listen("MessageDeleted", (e) => {
+                    messageDeleted(e.lastMessage);
                 });
         });
 

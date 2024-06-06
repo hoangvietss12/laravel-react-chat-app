@@ -56,9 +56,8 @@ export default function Home({ messages = null, selectedConversation = null }) {
             })
     }, [localMessages, noMoreMessage]);
 
-    // add new message
+    // message events
     const messageCreated = (message) => {
-        console.log(message)
         if(selectedConversation &&
             selectedConversation.is_group &&
             selectedConversation.id == message.group_id
@@ -73,7 +72,28 @@ export default function Home({ messages = null, selectedConversation = null }) {
             setLocalMessages((prevMessages) => [...prevMessages, message]);
         }
     }
-    // auto scroll when selectedConversation change
+
+    const messageDeleted = (message) => {
+        if(selectedConversation &&
+            selectedConversation.is_group &&
+            selectedConversation.id == message.group_id
+        ) {
+            setLocalMessages((prevMessages) => {
+                return prevMessages.filter((m) => m.id != message.id);
+            });
+        }
+
+        if(selectedConversation &&
+            selectedConversation.is_user &&
+            selectedConversation.id == message.sender_id || selectedConversation.id == message.receiver_id
+        ) {
+            setLocalMessages((prevMessages) => {
+                return prevMessages.filter((m) => m.id != message.id);
+            });
+        }
+    }
+
+    // handle message events
     useEffect(() => {
         setTimeout(() => {
             if(messagesCtrRef.current) {
@@ -97,6 +117,9 @@ export default function Home({ messages = null, selectedConversation = null }) {
                     messageCreated(e.message);
                     setNoMoreMessage(false);
                     setScrollFromBottom(0);
+                })
+                .listen("MessageDeleted", (e) => {
+                    messageDeleted(e.message);
                 });
         });
 
