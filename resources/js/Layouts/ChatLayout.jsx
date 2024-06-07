@@ -1,9 +1,10 @@
 import ConversationItem from "@/Components/ConversationItem";
 import TextInput from "@/Components/TextInput";
 import { PencilSquareIcon } from "@heroicons/react/24/solid";
-import { usePage } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import Echo from "laravel-echo";
+import GroupModal from "@/Components/GroupModal";
 
 
 export default function ChatLayout({ children }) {
@@ -15,6 +16,7 @@ export default function ChatLayout({ children }) {
     const [localConversations, setLocalConversations] = useState([]);
     const [sortedConversations, setSortedConversations] = useState([]);
     const [onlineUsers, setOnlineUsers] = useState({});
+    const [showGroupModal, setShowGroupModal] = useState(false);
 
 
     // check user online yet (return true/false)
@@ -91,6 +93,24 @@ export default function ChatLayout({ children }) {
         messageCreated(lastMessage);
     }
 
+    // group events
+    const storeGroup = (group) => {
+        console.log(group)
+    }
+
+    const groupDeleted = ({id, name}) => {
+        setLocalConversations((oldConversation) => {
+            return oldConversation.filter((c) => c.id != id)
+        });
+
+        if(
+            !selectedConversation ||
+            (selectedConversation.is_group && selectedConversation.id == id)
+        ) {
+            router.visit(route('dashboard'));
+        }
+    }
+
     // set local conversations whenever conversations change
     useEffect(() => {
         setLocalConversations(conversations);
@@ -99,6 +119,7 @@ export default function ChatLayout({ children }) {
     // handle message events
     useEffect(() => {
         conversations.forEach((conversation) => {
+            // listen action message
             let channel = `message.group.${conversation.id}`;
 
             if(conversation.is_user) {
@@ -115,6 +136,18 @@ export default function ChatLayout({ children }) {
                 .listen("MessageDeleted", (e) => {
                     messageDeleted(e.lastMessage);
                 });
+
+            // listen action group
+
+            if(conversation.is_group) {
+                window.Echo.private(`group.deleted.${conversation.id}`)
+                    .listen("GroupDeleted", (e) => {
+                        groupDeleted(e);
+                    })
+                    .error((e) => {
+                        console.error(e);
+                    });
+            }
         });
 
 
@@ -129,9 +162,28 @@ export default function ChatLayout({ children }) {
                     ].sort((a, b) => a - b).join('-')}`;
                 }
                 window.Echo.leave(channel);
+
+                if(conversation.is_group) {
+                    window.Echo.leave(`group.deleted.${conversation.id}`);
+                }
             });
         }
     }, [conversations]);
+
+    // listen created group
+    useEffect(() => {
+        window.Echo.private('group.created')
+            .listen("StoreGroup", (e) => {
+                storeGroup(e.group);
+            })
+            .error((e) => {
+                console.error(e);
+            });
+
+        return () => {
+            window.Echo.leave('group.created')
+        }
+    }, []);
 
     // sort conversation based on block_at and last_message_date
     useEffect(() => {
@@ -211,6 +263,7 @@ export default function ChatLayout({ children }) {
                             data-tip="Tạo nhóm mới"
                         >
                             <button
+                                onClick={(e) => setShowGroupModal(true)}
                                 className="text-blue-400 hover:text-blue-200"
                             >
                                 <PencilSquareIcon className="w-4 h-4 inline-block ml-2" />
@@ -248,6 +301,11 @@ export default function ChatLayout({ children }) {
                     {children}
                 </div>
             </div>
+
+            <GroupModal
+                show={showGroupModal}
+                onClose={() => setShowGroupModal(false)}
+            />
         </>
     )
 }

@@ -12,8 +12,8 @@ export default function Toast({}) {
 
     const toastMessage = (message) => {
         const uuid = uuidv4();
-        const sender = message.sender;
-        const groupId = message.group_id;
+        const sender = message.sender ?? null;
+        const groupId = message.group_id ?? null;
         const newMessage = message.message || `Đã chia sẻ ${
             message.attachments.length === 1
             ? "một file đính kèm"
@@ -31,6 +31,7 @@ export default function Toast({}) {
 
     useEffect(() => {
         conversations.forEach((conversation) => {
+            // listen action message
             let channel = `message.group.${conversation.id}`;
 
             if(conversation.is_user) {
@@ -44,6 +45,25 @@ export default function Toast({}) {
                 .listen("SocketMessage", (e) => {
                     toastMessage(e.message)
                 })
+
+            // listen action group
+            window.Echo.private(`group.updated.${conversation.id}`)
+                .listen("UpdateGroup", (e) => {
+                    toastMessage({message: `Nhóm ${e.group.name} đã cập nhật thành công!`});
+                })
+                .error((e) => {
+                    console.error(e);
+                });
+
+            if(conversation.is_group) {
+                window.Echo.private(`group.deleted.${conversation.id}`)
+                    .listen("GroupDeleted", (e) => {
+                        toastMessage({message: `Nhóm ${e.name} đã bị xóa!`});
+                    })
+                    .error((e) => {
+                        console.error(e);
+                    });
+            }
         });
 
         return () => {
@@ -57,12 +77,31 @@ export default function Toast({}) {
                     ].sort((a, b) => a - b).join('-')}`;
                 }
                 window.Echo.leave(channel);
+
+                if(conversation.is_group) {
+                    window.Echo.leave(`group.updated.${conversation.id}`);
+                    window.Echo.leave(`group.deleted.${conversation.id}`);
+                }
             });
         }
     }, [conversations]);
 
+    useEffect(() => {
+            window.Echo.private('group.created')
+                .listen("StoreGroup", (e) => {
+                    toastMessage({message: `Nhóm ${e.group.name} tạo thành công!`});
+                })
+                .error((e) => {
+                    console.error(e);
+                });
+
+        return () => {
+            window.Echo.leave('group.created')
+        }
+    }, []);
+
     return (
-        <div className="toast toast-top toast-center min-w-[240px]">
+        <div className="toast toast-top toast-center min-w-[280px] w-full xs:w-auto">
             {toasts.map((toast) => {
                 return (
                     <div

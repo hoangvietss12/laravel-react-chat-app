@@ -1,10 +1,29 @@
 import {Link, usePage} from '@inertiajs/react';
 import UserAvatar from './UserAvatar';
 import GroupAvatar from './GroupAvatar';
-import { ArrowLeftIcon } from '@heroicons/react/24/solid';
+import { ArrowLeftIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/solid';
+import GroupUserPopover from './GroupUserPopover';
+import GroupDescriptionPopover from './GroupDescriptionPopover';
+import GroupModal from './GroupModal';
+import { useState } from 'react';
 
 export default function ConversationHeader({selectedConversation}) {
-    // const page = usePage();
+    const authUser = usePage().props.auth.user;
+    const [showGroupModal, setShowGroupModal] = useState(false);
+
+    const onDeleteGroup = () => {
+        if(!window.confirm("Bạn chắc chắn muốn xóa nhóm này không?")) {
+            return;
+        }
+
+        axios.delete(route('group.destroy', selectedConversation.id))
+            .then((res) => {
+                console.log(res.data.message);
+            })
+            .catch((err) => {
+                console.error(err);
+            })
+    }
 
     return (
         <>
@@ -32,7 +51,45 @@ export default function ConversationHeader({selectedConversation}) {
                             )}
                         </div>
                     </div>
+
+                    {selectedConversation.is_group && (
+                        <div className='flex gap-3'>
+                            <GroupDescriptionPopover
+                                description={selectedConversation.description}
+                            />
+                            <GroupUserPopover
+                                users={selectedConversation.users}
+                            />
+                            {selectedConversation.owner_id == authUser.id && (
+                                <>
+                                    <div className='tooltip tooltip-left' data-tip='Chỉnh sửa nhóm'>
+                                        <button
+                                            onClick={() => setShowGroupModal(true)}
+                                            className='text-blue-400 hover:text-blue-200'
+                                        >
+                                            <PencilSquareIcon className='w-4' />
+                                        </button>
+                                    </div>
+                                    <div className='tooltip tooltip-left' data-tip='Xóa nhóm'>
+                                        <button
+                                            onClick={onDeleteGroup}
+                                            className='text-blue-400 hover:text-blue-200'
+                                        >
+                                            <TrashIcon className='w-4' />
+                                        </button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    )}
                 </div>
+            )}
+            {selectedConversation.is_group && (
+                <GroupModal
+                    show={showGroupModal}
+                    onClose={() => setShowGroupModal(false)}
+                    selectedConversation={selectedConversation}
+                />
             )}
         </>
     );

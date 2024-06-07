@@ -15,3 +15,15 @@ Broadcast::channel('message.user.{userId1}-{userId2}', function(User $user, $use
 Broadcast::channel('message.group.{groupId}', function (User $user, $groupId) {
     return $user->groups->contains('id', $groupId) ? $user : null;
 });
+
+Broadcast::channel('group.created', function(User $user) {
+    return $user ? $user : null;
+});
+
+Broadcast::channel('group.updated.{groupId}', function(User $user, $groupId) {
+    return $user->groups->contains('id', $groupId) ? $user : null;
+});
+
+Broadcast::channel('group.deleted.{groupId}', function(User $user, $groupId) {
+    return $user->groups->contains('id', intval($groupId)) ? $user : null;
+});
