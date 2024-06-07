@@ -32,6 +32,16 @@ class LoginRequest extends FormRequest
         ];
     }
 
+    public function messages(): array {
+        return [
+            'email.required' => 'Yêu cầu nhập vào email!',
+            'email.string' => 'Email phải là 1 chuỗi!',
+            'email.email' => 'Yêu cầu nhập đúng định dạng email!',
+            'password.required' => 'Yêu cầu nhập vào mật khẩu!',
+            'password.string' => 'Mật khẩu phải là 1 chuỗi!',
+        ];
+    }
+
     /**
      * Attempt to authenticate the request's credentials.
      *
@@ -46,6 +56,7 @@ class LoginRequest extends FormRequest
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
+                'password' => trans('auth.password'),
             ]);
         }
 
