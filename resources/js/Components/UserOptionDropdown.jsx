@@ -13,7 +13,7 @@ export default function UserOptionsDropdown({ conversation }) {
             return;
         }
 
-        axios.post(route('user.change-role', conversation.id))
+        axios.post(route('user.changeRole', conversation.id))
             .then((res) => {
                 console.log(res.data);
             })
@@ -27,7 +27,7 @@ export default function UserOptionsDropdown({ conversation }) {
             return;
         }
 
-        axios.post(route('user.block-unlock', conversation.id))
+        axios.post(route('user.blockUnblock', conversation.id))
             .then((res) => {
                 console.log(res.data);
             })

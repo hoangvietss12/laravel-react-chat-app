@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -84,12 +85,15 @@ class User extends Authenticatable
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'avatar_url' => $this->avatar ? Storage::url($this->avatar) : null,
             'is_group' => false,
             'is_user' => true,
             'is_admin' => (bool) $this->is_admin,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'blocked_at' => $this->blocked_at
+            'blocked_at' => $this->blocked_at,
+            'last_message' => $this->last_message,
+            'last_message_date' => $this->last_message_date ? $this->last_message_date. ' UTC' : null
         ];
     }
 }

@@ -27,3 +27,15 @@ Broadcast::channel('group.updated.{groupId}', function(User $user, $groupId) {
 Broadcast::channel('group.deleted.{groupId}', function(User $user, $groupId) {
     return $user->groups->contains('id', intval($groupId)) ? $user : null;
 });
+
+Broadcast::channel('user.created', function(User $user) {
+    return $user ? $user : null;
+});
+
+Broadcast::channel('user.changeRole.{userId}', function(User $user, $userId) {
+    return $user ? $user : null;
+});
+
+Broadcast::channel('user.blockUnblock.{userId}', function(User $user, $userId) {
+    return $user ? $user : null;
+});

@@ -5,12 +5,16 @@ import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
 import Toast from '@/Components/Toast';
+import PrimaryButton from '@/Components/PrimaryButton';
+import { UserPlusIcon } from '@heroicons/react/24/solid';
+import NewUserModal from '@/Components/NewUserModal';
 
 export default function Authenticated({ header, children }) {
     const page = usePage();
     const user = page.props.auth.user;
     const conversations = page.props.conversations;
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
+    const [showNewUserModal, setNewUserModal] = useState(false);
 
     return (
         <>
@@ -33,7 +37,16 @@ export default function Authenticated({ header, children }) {
                             </div>
 
                             <div className="hidden sm:flex sm:items-center sm:ms-6">
-                                <div className="ms-3 relative">
+                                <div className="flex ms-3 relative">
+                                    {user.is_admin && (
+                                        <PrimaryButton
+                                            onClick={(e) => setNewUserModal(true)}
+                                        >
+                                            <UserPlusIcon className="h-5 w-5 mr-2" />
+                                            Thêm thành viên mới
+                                        </PrimaryButton>
+                                    )}
+
                                     <Dropdown>
                                         <Dropdown.Trigger>
                                             <span className="inline-flex rounded-md">
@@ -60,7 +73,7 @@ export default function Authenticated({ header, children }) {
                                         </Dropdown.Trigger>
 
                                         <Dropdown.Content>
-                                            <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
+                                            <Dropdown.Link href={route('profile.edit')}>Trang cá nhân</Dropdown.Link>
                                             <Dropdown.Link href={route('logout')} method="post" as="button">
                                                 Đăng xuất
                                             </Dropdown.Link>
@@ -128,6 +141,7 @@ export default function Authenticated({ header, children }) {
 
             </div>
             <Toast />
+            <NewUserModal show={showNewUserModal} onClose={(e) => setNewUserModal(false)} />
         </>
     );
 }

@@ -47,18 +47,45 @@ export default function Toast({}) {
                 })
 
             // listen action group
-            window.Echo.private(`group.updated.${conversation.id}`)
-                .listen("UpdateGroup", (e) => {
-                    toastMessage({message: `Nhóm ${e.group.name} đã cập nhật thành công!`});
-                })
-                .error((e) => {
-                    console.error(e);
-                });
-
             if(conversation.is_group) {
                 window.Echo.private(`group.deleted.${conversation.id}`)
                     .listen("GroupDeleted", (e) => {
-                        toastMessage({message: `Nhóm ${e.name} đã bị xóa!`});
+                        toastMessage({message: `Nhóm "${e.name}" đã bị xóa!`});
+                    })
+                    .error((e) => {
+                        console.error(e);
+                    });
+
+                window.Echo.private(`group.updated.${conversation.id}`)
+                    .listen("UpdateGroup", (e) => {
+                        toastMessage({message: `Nhóm "${e.group.name}" đã cập nhật thành công!`});
+                    })
+                    .error((e) => {
+                        console.error(e);
+                    });
+            }
+
+            // listen action user
+            if(conversation.is_user) {
+                window.Echo.private(`user.blockUnblock.${conversation.id}`)
+                    .listen("BlockUnblockUser", (e) => {
+                        toastMessage({message:
+                            e.blocked_at
+                            ? `Tài khoản "${e.name}" đã bị khóa!`
+                            : `Tài khoản "${e.name}" đã được active!`
+                        });
+                    })
+                    .error((e) => {
+                        console.error(e);
+                    });
+
+                window.Echo.private(`user.changeRole.${conversation.id}`)
+                    .listen("ChangeRoleUser", (e) => {
+                        toastMessage({message:
+                            e.is_admin
+                            ? `Tài khoản "${e.name}" đã có quyền quản trị!`
+                            : `Tài khoản "${e.name}" đã bị thu hồi quyền quản trị!`
+                        });
                     })
                     .error((e) => {
                         console.error(e);
@@ -82,6 +109,11 @@ export default function Toast({}) {
                     window.Echo.leave(`group.updated.${conversation.id}`);
                     window.Echo.leave(`group.deleted.${conversation.id}`);
                 }
+
+                if(conversation.is_user) {
+                    window.Echo.leave(`user.changeRole.${conversation.id}`);
+                    window.Echo.leave(`user.blockUnblock.${conversation.id}`);
+                }
             });
         }
     }, [conversations]);
@@ -95,8 +127,17 @@ export default function Toast({}) {
                     console.error(e);
                 });
 
+                window.Echo.private('user.created')
+                .listen("UserCreated", (e) => {
+                    toastMessage({message: `Tài khoản ${e.name} đã thêm thành công!`});
+                })
+                .error((e) => {
+                    console.error(e);
+                });
+
         return () => {
-            window.Echo.leave('group.created')
+            window.Echo.leave('group.created');
+            window.Echo.leave('user.created');
         }
     }, []);
 

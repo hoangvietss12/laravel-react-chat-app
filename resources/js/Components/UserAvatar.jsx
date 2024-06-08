@@ -9,7 +9,7 @@ export default function UserAvatar({user, online = null, profile = false}) {
             {user.avatar_url && (
                 <div className={`chat-image avatar ${onlineClass}`}>
                     <div className={`rounded-full ${sizeClass}`}>
-                        <image src={user.avatar_url} />
+                        <img src={user.avatar_url} />
                     </div>
                 </div>
             )}

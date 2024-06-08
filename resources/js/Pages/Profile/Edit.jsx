@@ -7,9 +7,9 @@ import { Head } from '@inertiajs/react';
 export default function Edit({ auth, mustVerifyEmail, status }) {
     return (
         <>
-            <Head title="Profile" />
+            <Head title="Trang cá nhân" />
 
-            <div className="py-12">
+            <div className="py-12 overflow-y-auto">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
                     <div className="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                         <UpdateProfileInformationForm
@@ -36,7 +36,7 @@ Edit.layout = (page) => {
     return (
         <AuthenticatedLayout
             user={page.props.auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Profile</h2>}
+            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Trang cá nhân</h2>}
             children={page}
         >
             {page}
