@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\UserBlockedUnblocked;
+use App\Mail\UserRoleChanged;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use App\Events\BlockUnblockUser;
 use App\Events\ChangeRoleUser;
-use App\Events\UserCreated;
-use Illuminate\Http\Request;
 use App\Models\User;
+use App\Events\UserCreated as UserCreatedEvent;
+use App\Mail\UserCreated as UserCreatedMail;
 
 class UserController extends Controller
 {
@@ -29,7 +33,9 @@ class UserController extends Controller
 
         $user = User::create($data);
 
-        UserCreated::dispatch($user->name);
+        UserCreatedEvent::dispatch($user->name);
+
+        // Mail::to($user->email)->send(new UserCreatedMail($user, $password));
 
         return redirect()->back();
     }
@@ -38,6 +44,8 @@ class UserController extends Controller
         $user->update(['is_admin' => !(bool) $user->is_admin]);
 
         ChangeRoleUser::dispatch($user->id, $user->name, $user->is_admin);
+
+        // Mail::to($user)->send(new UserRoleChanged($user));
 
         return redirect()->back();
     }
@@ -53,6 +61,8 @@ class UserController extends Controller
 
         $user->save();
         BlockUnblockUser::dispatch($user->id, $user->name, $blocked_at);
+
+        // Mail::to($user)->send(new UserBlockedUnblocked($user));
 
         return redirect()->back();
     }
